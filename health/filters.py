@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from health.models import WeightRecord
+from health.models import WeightRecord, QuarantineRecord
 
 
 class WeightRecordFilterSet(filters.FilterSet):
@@ -47,3 +47,37 @@ class WeightRecordFilterSet(filters.FilterSet):
             "year_of_weighing",
         ]
 
+class QuarantineRecordFilterSet(filters.FilterSet):
+    """
+    Filter set for querying QuarantineRecord instances based on specific criteria.
+
+    Filters:
+    - `reason`: A filter for the quarantine reason (exact match).
+    - `start_date`: An exact match filter for the start date.
+    - `end_date`: An exact match filter for the end date.
+
+    Meta:
+    - `model`: The QuarantineRecord model for which the filter set is defined.
+    - `fields`: The fields available for filtering, including 'reason', 'start_date', and 'end_date'.
+
+    Usage:
+        Use this filter set to apply filters when querying the list of QuarantineRecord instances.
+        For example, to retrieve all quarantine records for a specific reason.
+
+    Example:
+        ```
+        /api/quarantine_records/?reason=some_reason
+        ```
+    """
+
+    reason = filters.CharFilter(field_name="reason", lookup_expr="exact")
+    start_date = filters.DateFilter(field_name="start_date", lookup_expr="exact")
+    end_date = filters.DateFilter(field_name="end_date", lookup_expr="exact")
+
+    class Meta:
+        model = QuarantineRecord
+        fields = [
+            "reason",
+            "start_date",
+            "end_date",
+        ]

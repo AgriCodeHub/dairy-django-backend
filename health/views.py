@@ -3,9 +3,9 @@ from rest_framework import viewsets, status
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
-from health.filters import WeightRecordFilterSet
-from health.models import WeightRecord
-from health.serializers import WeightRecordSerializer
+from health.filters import WeightRecordFilterSet, QuarantineRecordFilterSet
+from health.models import WeightRecord, QuarantineRecord
+from health.serializers import WeightRecordSerializer, QuarantineRecordSerializer
 from users.permissions import IsFarmManager, IsFarmOwner, IsAssistantFarmManager
 
 
@@ -62,6 +62,65 @@ class WeightRecordViewSet(viewsets.ModelViewSet):
             else:
                 return Response(
                     {"detail": "No Weight records found."}, status=status.HTTP_200_OK
+                )
+
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class QuarantineRecordViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to handle operations related to quarantine records.
+
+    Provides CRUD functionality for quarantine records.
+
+    Actions:
+    - list: Get a list of quarantine records based on applied filters.
+           Returns a 404 response if no quarantine records match the provided filters,
+           and a 200 response with an empty list if there are no quarantine records in the database.
+    - retrieve: Retrieve details of a specific quarantine record.
+    - create: Create a new quarantine record.
+    - update: Update an existing quarantine record.
+    - partial_update: Partially update an existing quarantine record.
+    - destroy: Delete an existing quarantine record.
+
+    Serializer class used for request/response data: QuarantineRecordSerializer.
+
+    Permissions:
+    - For 'list', 'retrieve': Accessible to assistant farm managers, farm managers, and farm owners only.
+    - For 'create': Accessible to farm workers, assistant farm managers, farm managers, and farm owners.
+    - For 'update', 'partial_update', 'destroy': Accessible to farm managers and farm owners only.
+
+    """
+
+    queryset = QuarantineRecord.objects.all()
+    serializer_class = QuarantineRecordSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_class = QuarantineRecordFilterSet
+    ordering_fields = ["-start_date"]
+    permission_classes = [IsAssistantFarmManager | IsFarmManager | IsFarmOwner]
+
+    def list(self, request, *args, **kwargs):
+        """
+        List quarantine records based on applied filters.
+
+        Returns a 404 response if no quarantine records match the provided filters,
+        and a 200 response with an empty list if there are no quarantine records in the database.
+
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+
+        if not queryset.exists():
+            if request.query_params:
+                return Response(
+                    {
+                        "detail": "No Quarantine records found matching the provided filters."
+                    },
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            else:
+                return Response(
+                    {"detail": "No Quarantine records found."}, status=status.HTTP_200_OK
                 )
 
         serializer = self.get_serializer(queryset, many=True)
