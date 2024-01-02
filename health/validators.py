@@ -1,6 +1,9 @@
 from django.core.exceptions import ValidationError
-
-from core.choices import CowAvailabilityChoices
+from django.db import models
+from users.choices import SexChoices
+from core.choices import CowAvailabilityChoices, CowPregnancyChoices
+from health.choices import QuarantineReasonChoices
+from core.models import Cow
 
 
 class WeightRecordValidator:
@@ -63,3 +66,42 @@ class WeightRecordValidator:
 
         if WeightRecord.objects.filter(cow=cow, date_taken=date_taken).count() > 1:
             raise ValidationError("This cow already has a weight record on this date!", code="duplicate_weight_record")
+
+class QuarantineValidator:
+    @staticmethod
+    def validate_reason(reason, cow):
+        """
+        Validate the reason for cow quarantine.
+
+        Parameters:
+        - reason (str): The reason for cow quarantine.
+        - cow (Cow): The cow to be quarantined.
+
+        Raises:
+        - ValidationError: If the validation fails.
+
+        Returns:
+        - None
+        """
+        if reason == QuarantineReasonChoices.CALVING:
+            if cow.gender != SexChoices.FEMALE:
+                raise ValidationError("Only female cows can be quarantined for 'Calving'.")
+
+            if cow.current_pregnancy_status != CowPregnancyChoices.PREGNANT:
+                raise ValidationError("Only pregnant female cows can be quarantined for 'Calving'.")
+    @staticmethod
+    def validate_date(start_date, end_date):
+        """
+        Validate the date range for start and end dates.
+
+        Args:
+        - start_date (date): The start date of the quarantine.
+        - end_date (date or None): The end date of the quarantine.
+        - record_id (int or None): The ID of the record being updated.
+
+        Raises:
+        - ValidationError: If the date range is invalid.
+        """
+        if start_date and end_date and start_date > end_date:
+            raise ValidationError("End date must be equal to or after the start date.")
+

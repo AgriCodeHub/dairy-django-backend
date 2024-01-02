@@ -1,7 +1,8 @@
 from django.db import models
 
 from core.models import Cow
-from health.validators import WeightRecordValidator
+from health.validators import WeightRecordValidator, QuarantineValidator
+from health.choices import QuarantineReasonChoices
 
 
 class WeightRecord(models.Model):
@@ -50,3 +51,30 @@ class WeightRecord(models.Model):
         self.clean()
         super().save(*args, **kwargs)
 
+class QuarantineRecord(models.Model):
+    class Meta:
+        get_latest_by = "-start_date"
+
+    cow = models.ForeignKey(
+        Cow, on_delete=models.CASCADE, related_name="quarantine_records"
+    )
+    reason = models.CharField(max_length=35, choices=QuarantineReasonChoices.choices)
+    start_date = models.DateField(auto_now_add=True)
+    end_date = models.DateField(null=True)
+    notes = models.TextField(null=True, max_length=100)
+
+    def __str__(self):
+        if self.end_date:
+            return f"Quarantine Record of {self.cow.tag_number} from {self.start_date} to {self.end_date}"
+        return f"Quarantine Record of {self.cow.tag_number} from {self.start_date}"
+
+    def clean(self):
+        # Validate the reason for quarantine
+        QuarantineValidator.validate_reason(self.reason, self.cow)
+
+        # Validate the date range for start and end dates
+        QuarantineValidator.validate_date(self.start_date, self.end_date)
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
