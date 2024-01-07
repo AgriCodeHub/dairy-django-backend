@@ -4,6 +4,10 @@ from django.core.exceptions import ValidationError
 from core.choices import CowBreedChoices
 from core.models import CowBreed
 
+# new import for test_disease_model
+from core.models import CowDisease
+from datetime import date
+
 
 @pytest.mark.django_db
 class TestCowBreedModel:
@@ -24,3 +28,11 @@ class TestCowBreedModel:
         with pytest.raises(ValidationError) as err:
             CowBreed.objects.create(name=CowBreedChoices.FRIESIAN)
         assert err.value.code == 'duplicate_cow_breed'
+
+
+
+# a pytest for CowDisease
+@pytest.mark.django_db
+class TestCowDiseaseModel:
+    # Creating a terst instance for the related models.
+    pathogen = Pathogem.objects.create(name="Pathogn Test For Cow")

@@ -224,3 +224,30 @@ class Inseminator(models.Model):
         Returns a string representation of the inseminator.
         """
         return f"{self.first_name} {self.last_name}"
+
+
+
+class CowDisease(models.Model):
+    """
+    Represents disease in individual cow.
+    
+    Attributes:
+    - `name` (str): The name of the disease.
+    - `pathogen` (ForeignKey): The pathogen associated with the disease.
+    - `category` (ForeignKey to DiseaseCategory): The category to which the disease belongs.
+	- `date_reported` (Date, auto_now_add=True): The date when the disease is reported.
+	- `is_recovered	 (BooleanField, default=False): Indicates whether the disease is recovered.
+	- `recovered_date` (Date, editable=False, blank=True, null=True): The date when the disease is marked as recovered.
+	- `notes` (TextField, blank=True): Additional notes related to the disease.
+
+
+	Relationships:
+	- `cows` (ManyToManyField to Cow, related_name="diseases"): The cows affected by the disease.
+	- `symptoms` (ManyToManyField to Symptoms, related_name="diseases"): The symptoms associated with the disease.
+	- `treatments` (ManyToManyField to Treatment, related_name="diseases"): The treatments applied for the disease.
+
+	Usage:
+	- Use the model class to represent the Disease for each cow.
+
+    """
+    pass
