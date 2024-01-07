@@ -12,6 +12,9 @@ from core.managers import CowManager
 from core.validators import CowValidator, CowBreedValidator
 from users.choices import SexChoices
 
+# new imports
+from datetime import date
+
 
 class CowBreed(models.Model):
     """
@@ -250,4 +253,37 @@ class CowDisease(models.Model):
 	- Use the model class to represent the Disease for each cow.
 
     """
-    pass
+    name = models.CharField(max_length=255, unique=True)
+    pathogen = models.ForeignKey(Pathogen, on_delete=models.PROTECT)
+    category = models.ForeignKey(CategoryDisease, on_delete=models.PROTECT)
+    date_reported = models.DateField(auto_now_add=True)
+    is_recovered = models.BooleanField(default=False)
+    recovered_date = models.DateField(editable=False, blank=True, null=True)
+    notes = models.TextField(blank=True)
+    cows = models.ManyToManyField(Cow, related_name="diseases")
+    symptoms = models.ManyToManyField(Symptoms, related_name="diseases")
+    treatments = models.ManyToManyField(Treatment, related_name="diseases")
+    
+    
+    # used the clean function to do validation checks.
+    def clean(self):
+        # Checking for Validations using the IF statements
+        if self.is_recovered and not self.recovered_date:
+            raise models.ValidationError("If a disease is marked as recovered, a recovered date is required.")
+        
+        elif self.recovered_date and not self.is_recovered:
+            raise models.ValidationError("If a recovered date is provided, the disease must be marked as recovered.")
+        
+        elif self.recovered_date and not self.date_reported:
+            raise modelsl.ValidationError("The recovered date is after the occurrence date.")
+        
+        elif self.date_reported > date.today():
+            raise models.ValidationError("The occurrence date is not in the future.")
+        
+        elif not self.name or not self.pathogen:
+            raise models.ValidationError("The presence of the disease name and associated pathogen.")
+        
+        elif self.is_recovered and not self.treatments.exist():
+            raise models.ValidationError("If a disease is recovered, at least one treatment is required.")
+        
+        
