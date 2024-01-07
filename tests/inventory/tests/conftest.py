@@ -152,16 +152,3 @@ def setup_cows():
         "current_production_status": CowProductionStatusChoices.OPEN,
     }
     return general_cow
-
-
-@pytest.fixture
-def setup_inseminators_data():
-    inseminators_data = {
-        "first_name": "Peter",
-        "last_name": "Evance",
-        "phone_number": "+254712345678",
-        "sex": SexChoices.MALE,
-        "company": "Peter's Breeders",
-        "license_number": "ABCD-01-2024",
-    }
-    return inseminators_data

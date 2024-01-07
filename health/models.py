@@ -1,8 +1,16 @@
 from django.db import models
 
 from core.models import Cow
-from health.choices import CullingReasonChoices, QuarantineReasonChoices
-from health.validators import WeightRecordValidator, QuarantineValidator
+from health.choices import (
+    CullingReasonChoices,
+    QuarantineReasonChoices,
+    PathogenChoices,
+)
+from health.validators import (
+    PathogenValidator,
+    WeightRecordValidator,
+    QuarantineValidator,
+)
 
 
 class WeightRecord(models.Model):
@@ -85,6 +93,22 @@ class CullingRecord(models.Model):
 
 
 class QuarantineRecord(models.Model):
+    """
+    Represents a quarantine record for a cow.
+
+    Attributes:
+    - `cow` (Cow): The cow associated with the quarantine record.
+    - `reason` (str): The reason for quarantine, chosen from predefined choices.
+    - `start_date` (Date): The start date of the quarantine period.
+    - `end_date` (Date): The end date of the quarantine period (optional).
+    - `notes` (str): Additional notes or comments about the quarantine.
+
+    Methods:
+    - `__str__`: Returns a string representation of the quarantine record.
+    - `clean`: Validates the reason for quarantine and the date range.
+    - `save`: Overrides the save method to perform additional validation before saving.
+    """
+
     class Meta:
         get_latest_by = "-start_date"
 
@@ -102,6 +126,9 @@ class QuarantineRecord(models.Model):
         return f"Quarantine Record of {self.cow.tag_number} from {self.start_date}"
 
     def clean(self):
+        """
+        Validate the reason for quarantine and the date range for start and end dates.
+        """
         # Validate the reason for quarantine
         QuarantineValidator.validate_reason(self.reason, self.cow)
 
@@ -109,5 +136,36 @@ class QuarantineRecord(models.Model):
         QuarantineValidator.validate_date(self.start_date, self.end_date)
 
     def save(self, *args, **kwargs):
+        """
+        Overrides the save method to perform additional validation before saving.
+        """
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class Pathogen(models.Model):
+    """
+    Represents a pathogen affecting a cow.
+
+    Attributes:
+    - `name` (str): The type of pathogen, chosen from predefined choices.
+
+    Methods:
+    - `clean`: Validates the name of the pathogen.
+    """
+
+    name = models.CharField(max_length=10, choices=PathogenChoices.choices)
+    # diagnosis_date = models.DateField(auto_now_add=True)
+
+    def clean(self):
+        """
+        Validate the name of the pathogen.
+        """
+        PathogenValidator.validate_name(self.name)
+
+    def save(self, *args, **kwargs):
+        """
+        Overrides the save method to perform additional validation before saving.
+        """
         self.clean()
         super().save(*args, **kwargs)

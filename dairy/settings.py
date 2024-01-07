@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "production",
     "reproduction",
     "health",
+    "inventory",
 ]
 
 # Middleware classes. They process requests and responses globally.

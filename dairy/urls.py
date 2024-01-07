@@ -30,6 +30,7 @@ urlpatterns = [
     path("reproduction/", include("reproduction.urls", namespace="reproduction")),
     path("production/", include("production.urls", namespace="production")),
     path("health/", include("health.urls", namespace="health")),
+    path("inventory/", include("inventory.urls", namespace="inventory")),
     # URL for Swagger documentation with UI
     path(
         "swagger/",

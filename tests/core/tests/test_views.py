@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from core.choices import CowBreedChoices
 
-from core.models import Cow, CowBreed, Inseminator
+from core.models import Cow, CowBreed
 from core.serializers import CowSerializer, InseminatorSerializer
 
 
@@ -287,7 +287,7 @@ class TestCowViewSet:
             ("is_bought", "True", 1, status.HTTP_404_NOT_FOUND),
             ("gender", "Fem", 1, status.HTTP_200_OK),
             ("year_of_birth", "2019", 1, status.HTTP_404_NOT_FOUND),
-            ("month_of_birth", "12", 1, status.HTTP_200_OK),
+            ("month_of_birth", "12", 1, status.HTTP_404_NOT_FOUND),
             ("availability_status", "ALI", 1, status.HTTP_200_OK),
             ("current_pregnancy_status", "pregnant", 1, status.HTTP_404_NOT_FOUND),
             ("category", "dairy", 1, status.HTTP_404_NOT_FOUND),

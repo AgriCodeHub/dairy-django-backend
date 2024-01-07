@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 
 from core.choices import CowAvailabilityChoices, CowPregnancyChoices
-from health.choices import QuarantineReasonChoices
+from health.choices import QuarantineReasonChoices, PathogenChoices
 from users.choices import SexChoices
 
 
@@ -76,17 +76,39 @@ class WeightRecordValidator:
 
 
 class QuarantineValidator:
+    """
+    Validator class for validating quarantine-related logic.
+
+    Methods:
+    - `validate_reason`: Validate the reason for cow quarantine.
+    - `validate_date`: Validate the date range for start and end dates.
+
+    Usage:
+        Use this class to perform validation checks related to cow quarantine.
+
+    Example:
+        ```
+        class QuarantineRecord(models.Model):
+            # ... (Other fields)
+
+        class QuarantineValidator:
+            # ... (Methods and documentation)
+        ```
+    """
+
     @staticmethod
     def validate_reason(reason, cow):
         """
         Validate the reason for cow quarantine.
 
         Parameters:
-        - reason (str): The reason for cow quarantine.
-        - cow (Cow): The cow to be quarantined.
+        - `reason` (str): The reason for cow quarantine.
+        - `cow` (Cow): The cow to be quarantined.
 
         Raises:
-        - ValidationError: If the validation fails.
+        - `ValidationError`: If the validation fails.
+            - Code: `invalid_quarantine_reason`
+            - Message: "Invalid reason for cow quarantine."
 
         Returns:
         - None
@@ -94,12 +116,14 @@ class QuarantineValidator:
         if reason == QuarantineReasonChoices.CALVING:
             if cow.gender != SexChoices.FEMALE:
                 raise ValidationError(
-                    "Only female cows can be quarantined for 'Calving'."
+                    "Invalid reason for cow quarantine: Only female cows can be quarantined for 'Calving'.",
+                    code="invalid_quarantine_reason",
                 )
 
             if cow.current_pregnancy_status != CowPregnancyChoices.PREGNANT:
                 raise ValidationError(
-                    "Only pregnant female cows can be quarantined for 'Calving'."
+                    "Invalid reason for cow quarantine: Only pregnant female cows can be quarantined for 'Calving'.",
+                    code="invalid_quarantine_reason",
                 )
 
     @staticmethod
@@ -108,12 +132,55 @@ class QuarantineValidator:
         Validate the date range for start and end dates.
 
         Args:
-        - start_date (date): The start date of the quarantine.
-        - end_date (date or None): The end date of the quarantine.
-        - record_id (int or None): The ID of the record being updated.
+        - `start_date` (date): The start date of the quarantine.
+        - `end_date` (date or None): The end date of the quarantine.
 
         Raises:
-        - ValidationError: If the date range is invalid.
+        - `ValidationError`: If the date range is invalid.
+            - Code: `invalid_date_range`
+            - Message: "End date must be equal to or after the start date."
         """
         if start_date and end_date and start_date > end_date:
-            raise ValidationError("End date must be equal to or after the start date.")
+            raise ValidationError(
+                "Invalid date range for quarantine: End date must be equal to or after the start date.",
+                code="invalid_date_range",
+            )
+
+
+class PathogenValidator:
+    """
+    Validator class for validating pathogen-related logic.
+
+    Methods:
+    - `validate_name`: Validate the name of the pathogen.
+
+    Usage:
+        Use this class to perform validation checks related to pathogens.
+
+    Example:
+        ```
+        class Pathogen(models.Model):
+            # ... (Other fields)
+
+        class PathogenValidator:
+            # ... (Methods and documentation)
+        ```
+    """
+
+    @staticmethod
+    def validate_name(name):
+        """
+        Validate the name of the pathogen.
+
+        Parameters:
+        - `name` (str): The name of the pathogen.
+
+        Raises:
+        - `ValidationError`: If the validation fails.
+            - Code: `invalid_pathogen_name`
+            - Message: "Invalid name for the pathogen."
+        """
+        if name not in PathogenChoices.values:
+            raise ValidationError(
+                f"Invalid name for the pathogen: {name}", code="invalid_pathogen_name"
+            )

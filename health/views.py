@@ -9,8 +9,13 @@ from health.filters import (
     CullingRecordFilterSet,
     QuarantineRecordFilterSet,
 )
-from health.models import WeightRecord, CullingRecord, QuarantineRecord
-from health.serializers import WeightRecordSerializer, CullingRecordSerializer, QuarantineRecordSerializer
+from health.models import WeightRecord, CullingRecord, QuarantineRecord, Pathogen
+from health.serializers import (
+    WeightRecordSerializer,
+    CullingRecordSerializer,
+    QuarantineRecordSerializer,
+    PathogenSerializer,
+)
 from users.permissions import IsFarmManager, IsFarmOwner, IsAssistantFarmManager
 
 
@@ -213,3 +218,34 @@ class QuarantineRecordViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PathogenViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet to handle operations related to pathogens.
+
+    Provides CRUD functionality for pathogens.
+
+    Actions:
+    - `list`: Get a list of all pathogens.
+    - `retrieve`: Retrieve details of a specific pathogen.
+    - `create`: Create a new pathogen.
+    - `update`: Update an existing pathogen.
+    - `partial_update`: Partially update an existing pathogen.
+    - `destroy`: Delete an existing pathogen.
+
+    Serializer class used for request/response data: `PathogenSerializer`.
+
+    Permissions:
+    - For 'list', 'retrieve', 'create', 'update', 'partial_update', 'destroy':
+      Accessible to farm managers and farm owners only.
+
+    Attributes:
+    - `queryset`: Queryset containing all `Pathogen` instances.
+    - `serializer_class`: Serializer class for `Pathogen`.
+    - `permission_classes`: Permission classes for controlling access to different actions.
+    """
+
+    queryset = Pathogen.objects.all()
+    serializer_class = PathogenSerializer
+    permission_classes = [IsFarmManager | IsFarmOwner]

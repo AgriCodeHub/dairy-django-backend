@@ -70,7 +70,57 @@ class CullingReasonChoices(models.TextChoices):
 
 
 class QuarantineReasonChoices(models.TextChoices):
+    """
+    Choices for reasons behind quarantining a cow.
+
+    Choices:
+    - `SICK_COW`: Quarantine due to a sick cow.
+    - `BOUGHT_COW`: Quarantine after buying a new cow.
+    - `NEW_COW`: Quarantine for a new cow arrival.
+    - `CALVING`: Quarantine during calving.
+
+    Usage:
+        These choices represent various reasons for quarantining a cow and are used as options in the QuarantineRecord model.
+
+    Example:
+        ```
+        class QuarantineRecord(models.Model):
+            cow = models.ForeignKey(Cow, on_delete=models.CASCADE, related_name="quarantine_records")
+            reason = models.CharField(max_length=20, choices=QuarantineReasonChoices.choices)
+            notes = models.TextField(null=True, max_length=100)
+            start_date = models.DateField()
+            end_date = models.DateField(null=True, blank=True)
+        ```
+    """
+
     SICK_COW = "Sick Cow"
     BOUGHT_COW = "Bought Cow"
     NEW_COW = "New Cow"
     CALVING = "Calving"
+
+
+class PathogenChoices(models.TextChoices):
+    """
+    Choices for types of pathogens affecting a cow.
+
+    Choices:
+    - `BACTERIA`: Bacterial infection.
+    - `VIRUS`: Viral infection.
+    - `FUNGI`: Fungal infection.
+    - `UNKNOWN`: Unknown pathogen.
+
+    Usage:
+        These choices represent different types of pathogens affecting a cow and are used as options in the PathogenRecord model.
+
+    Example:
+        ```
+        class PathogenRecord(models.Model):
+            name= models.CharField(max_length=10, choices=PathogenChoices.choices)
+            # diagnosis_date = models.DateField(auto_now_add=True)
+        ```
+    """
+
+    BACTERIA = "Bacteria"
+    VIRUS = "Virus"
+    FUNGI = "Fungi"
+    UNKNOWN = "Unknown"

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from core.models import Cow
-from health.models import WeightRecord, CullingRecord, QuarantineRecord
+from health.models import WeightRecord, CullingRecord, QuarantineRecord, Pathogen
 
 
 class WeightRecordSerializer(serializers.ModelSerializer):
@@ -82,6 +82,7 @@ class CullingRecordSerializer(serializers.ModelSerializer):
         model = CullingRecord
         fields = ("cow", "reason", "notes", "date_carried")
 
+
 class QuarantineRecordSerializer(serializers.ModelSerializer):
     """
     Serializer for the QuarantineRecord model.
@@ -117,8 +118,41 @@ class QuarantineRecordSerializer(serializers.ModelSerializer):
         ```
     """
 
-    cow =  serializers.PrimaryKeyRelatedField(queryset=Cow.objects.all())
+    cow = serializers.PrimaryKeyRelatedField(queryset=Cow.objects.all())
 
     class Meta:
         model = QuarantineRecord
         fields = ("cow", "reason", "start_date", "end_date", "notes")
+
+
+class PathogenSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Pathogen model.
+
+    Fields:
+    - `name`: A choice field representing the type of pathogen.
+
+    Meta:
+    - `model`: The Pathogen model for which the serializer is defined.
+    - `fields`: The fields to include in the serialized representation.
+
+    Usage:
+        Use this serializer to convert Pathogen model instances to JSON representations
+        and vice versa.
+
+    Example:
+        ```
+        class Pathogen(models.Model):
+            name = models.CharField(max_length=10, choices=PathogenChoices.choices)
+            # diagnosis_date = models.DateField(auto_now_add=True)
+
+        class PathogenSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = Pathogen
+                fields = ("name",)
+        ```
+    """
+
+    class Meta:
+        model = Pathogen
+        fields = ("name",)

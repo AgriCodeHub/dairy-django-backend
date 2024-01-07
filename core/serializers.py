@@ -144,3 +144,4 @@ class InseminatorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Inseminator
         fields = ("first_name", "last_name", "phone_number", "sex", "company", "license_number")
+
